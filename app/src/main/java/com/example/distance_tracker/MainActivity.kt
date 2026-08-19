@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.Locale
 
@@ -60,9 +61,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initManagers() {
-        val fusedClient = LocationClientProvider.init(this)
-        startPointManager = StartPointManager(fusedClient)
-        endPointManager = EndPointManager(this, fusedClient)
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        startPointManager = StartPointManager(fusedLocationClient)
+        endPointManager = EndPointManager(this, fusedLocationClient)
     }
 
     private fun initUI() {
@@ -118,9 +119,15 @@ class MainActivity : AppCompatActivity() {
 
         btnSetEnd.setOnClickListener {
             if (PermissionHelper.hasLocationPermission(this)) {
-                endPointManager.setEndPoint(startPointManager.startLocation) { location, distance ->
-                    updateEndUI(location)
-                    updateDistanceUI(distance)
+                val startLocation = startPointManager.startLocation
+                if (startLocation == null) {
+                    Toast.makeText(this, "Please set Start Point first", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                endPointManager.setEndPoint(startLocation) { endLoc, distanceMeters ->
+                    updateEndUI(endLoc)
+                    updateDistanceUI(distanceMeters)
                 }
             } else {
                 PermissionHelper.requestLocationPermission(this)
@@ -149,7 +156,7 @@ class MainActivity : AppCompatActivity() {
             tvDistanceUnit.text = getString(R.string.unit_km)
         } else {
             tvDistanceValue.text = String.format(Locale.US, "%.0f", distanceMeters)
-            tvDistanceUnit.text = "m"
+            tvDistanceUnit.text = getString(R.string.unit_m)
         }
     }
 
