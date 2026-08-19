@@ -5,6 +5,8 @@ import android.content.Context
 import android.location.Location
 import android.widget.Toast
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 
 /**
  * Manages fetching the end location and calculating the distance from a start location.
@@ -19,8 +21,8 @@ class EndPointManager(
         private set
 
     /**
-     * Fetches current location, stores it as endLocation, and calculates distance from startLocation.
-     * Permission check is suppressed as it is handled by PermissionHelper.
+     * Fetches fresh current location, stores it as endLocation, and calculates distance.
+     * Uses getCurrentLocation to ensure the coordinates are not stale.
      */
     @SuppressLint("MissingPermission")
     fun setEndPoint(
@@ -33,8 +35,9 @@ class EndPointManager(
             return
         }
 
-        // 2. Fetch the last known location using FusedLocationProviderClient
-        fusedLocationClient.lastLocation
+        // 2. Fetch fresh high-accuracy location
+        val cts = CancellationTokenSource()
+        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
                     // 3. Store the location in the property
@@ -46,12 +49,10 @@ class EndPointManager(
                     // 5. Return the results via callback
                     onResult(location, distance)
                 } else {
-                    // Handle case where location is enabled but could not be retrieved
-                    Toast.makeText(context, "Unable to get end location", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Unable to get fresh end location", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener {
-                // Handle API or internal fetch failures
                 Toast.makeText(context, "Location fetch failed", Toast.LENGTH_SHORT).show()
             }
     }
