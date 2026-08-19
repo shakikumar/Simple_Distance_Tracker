@@ -2,6 +2,7 @@ package com.example.distance_tracker
 
 import android.location.Location
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -10,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.google.android.gms.location.LocationServices
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -18,12 +19,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var startPointManager: StartPointManager
     private lateinit var endPointManager: EndPointManager
 
+    // UI Elements - Tracker
+    private lateinit var layoutTracker: ConstraintLayout
     private lateinit var tvStartLat: TextView
     private lateinit var tvStartLng: TextView
     private lateinit var tvEndLat: TextView
     private lateinit var tvEndLng: TextView
     private lateinit var tvDistanceValue: TextView
     private lateinit var tvDistanceUnit: TextView
+    private lateinit var btnSetStart: Button
+    private lateinit var btnSetEnd: Button
+    private lateinit var btnReset: Button
+
+    // UI Elements - History
+    private lateinit var layoutHistory: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,36 +57,58 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
 
-        // Initialize Managers
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        startPointManager = StartPointManager(fusedLocationClient)
-        endPointManager = EndPointManager(this, fusedLocationClient)
+    private fun initManagers() {
+        val fusedClient = LocationClientProvider.init(this)
+        startPointManager = StartPointManager(fusedClient)
+        endPointManager = EndPointManager(this, fusedClient)
+    }
 
-        // Initialize Views
+    private fun initUI() {
+        layoutTracker = findViewById(R.id.layout_tracker)
+        layoutHistory = findViewById(R.id.layout_history)
+        
         tvStartLat = findViewById(R.id.tv_start_lat)
         tvStartLng = findViewById(R.id.tv_start_lng)
         tvEndLat = findViewById(R.id.tv_end_lat)
         tvEndLng = findViewById(R.id.tv_end_lng)
         tvDistanceValue = findViewById(R.id.tv_distance_value)
         tvDistanceUnit = findViewById(R.id.tv_distance_unit)
+        
+        btnSetStart = findViewById(R.id.btn_set_start)
+        btnSetEnd = findViewById(R.id.btn_set_end)
+        btnReset = findViewById(R.id.btn_reset)
+    }
 
-        val btnSetStart: Button = findViewById(R.id.btn_set_start)
-        val btnSetEnd: Button = findViewById(R.id.btn_set_end)
-        val btnReset: Button = findViewById(R.id.btn_reset)
-
-        // Request Permission on Launch
-        if (!PermissionHelper.hasLocationPermission(this)) {
-            PermissionHelper.requestLocationPermission(this)
+    private fun setupBottomNavigation() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_tracker -> {
+                    layoutTracker.visibility = View.VISIBLE
+                    layoutHistory.visibility = View.GONE
+                    true
+                }
+                R.id.navigation_history -> {
+                    layoutTracker.visibility = View.GONE
+                    layoutHistory.visibility = View.VISIBLE
+                    true
+                }
+                else -> false
+            }
         }
+    }
 
+    private fun setupClickListeners() {
         btnSetStart.setOnClickListener {
             if (PermissionHelper.hasLocationPermission(this)) {
                 startPointManager.fetchStartPoint { location ->
                     if (location != null) {
                         updateStartUI(location)
+                        Toast.makeText(this, "Start point set!", Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(this, "Failed to get start location", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Failed to get location", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
@@ -87,15 +118,9 @@ class MainActivity : AppCompatActivity() {
 
         btnSetEnd.setOnClickListener {
             if (PermissionHelper.hasLocationPermission(this)) {
-                val startLocation = startPointManager.startLocation
-                if (startLocation == null) {
-                    Toast.makeText(this, "Please set Start Point first", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                endPointManager.setEndPoint(startLocation) { endLoc, distanceMeters ->
-                    updateEndUI(endLoc)
-                    updateDistanceUI(distanceMeters)
+                endPointManager.setEndPoint(startPointManager.startLocation) { location, distance ->
+                    updateEndUI(location)
+                    updateDistanceUI(distance)
                 }
             } else {
                 PermissionHelper.requestLocationPermission(this)
@@ -108,23 +133,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateStartUI(location: Location) {
-        tvStartLat.text = String.format(Locale.getDefault(), "%.6f", location.latitude)
-        tvStartLng.text = String.format(Locale.getDefault(), "%.6f", location.longitude)
+        tvStartLat.text = String.format(Locale.US, "%.6f", location.latitude)
+        tvStartLng.text = String.format(Locale.US, "%.6f", location.longitude)
     }
 
     private fun updateEndUI(location: Location) {
-        tvEndLat.text = String.format(Locale.getDefault(), "%.6f", location.latitude)
-        tvEndLng.text = String.format(Locale.getDefault(), "%.6f", location.longitude)
+        tvEndLat.text = String.format(Locale.US, "%.6f", location.latitude)
+        tvEndLng.text = String.format(Locale.US, "%.6f", location.longitude)
     }
 
     private fun updateDistanceUI(distanceMeters: Float) {
         if (distanceMeters >= 1000) {
-            val distanceKm = distanceMeters / 1000
-            tvDistanceValue.text = String.format(Locale.getDefault(), "%.2f", distanceKm)
+            val km = distanceMeters / 1000
+            tvDistanceValue.text = String.format(Locale.US, "%.2f", km)
             tvDistanceUnit.text = getString(R.string.unit_km)
         } else {
-            tvDistanceValue.text = String.format(Locale.getDefault(), "%.0f", distanceMeters)
-            tvDistanceUnit.text = getString(R.string.unit_m)
+            tvDistanceValue.text = String.format(Locale.US, "%.0f", distanceMeters)
+            tvDistanceUnit.text = "m"
         }
     }
 
