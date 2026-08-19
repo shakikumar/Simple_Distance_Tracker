@@ -57,9 +57,9 @@ class EndPointManager(
     }
 
     /**
-     * Clears the stored end location.
+     * Clears the stored end point.
      */
-    fun reset() {
+    fun clearEndPoint() {
         endLocation = null
     }
 }
