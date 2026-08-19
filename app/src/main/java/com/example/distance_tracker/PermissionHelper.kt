@@ -1,4 +1,4 @@
-package com.group3.distancetracker
+package com.example.distance_tracker
 
 import android.Manifest
 import android.app.Activity

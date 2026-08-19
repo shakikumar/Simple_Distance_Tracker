@@ -16,6 +16,7 @@
     <string name="label_total_distance">TOTAL DISTANCE</string>
     <string name="label_default_distance">0.00</string>
     <string name="unit_km">km</string>
+    <string name="unit_m">m</string>
     <string name="distance_description">Straight-line distance between Start\nPoint and End Point.</string>
 
     <string name="btn_reset_tracking">Reset Tracking</string>
