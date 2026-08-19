@@ -1,3 +1,45 @@
 <resources>
-    <string name="app_name">Distance_Tracker</string>
+    <string name="app_name">Simple Distance Tracker</string>
+    <string name="title_distance_tracker">Distance Tracker</string>
+    <string name="title_distance_history">Distance History</string>
+    <string name="status_location_ready">Location Ready</string>
+
+    <string name="label_start_point">Start Point</string>
+    <string name="label_end_point">End Point</string>
+    <string name="label_latitude">LATITUDE</string>
+    <string name="label_longitude">LONGITUDE</string>
+    <string name="label_default_coords">0.000000</string>
+
+    <string name="btn_set_start">Set Start Point</string>
+    <string name="btn_set_end">Set End Point</string>
+
+    <string name="label_total_distance">TOTAL DISTANCE</string>
+    <string name="label_default_distance">0.00</string>
+    <string name="unit_km">km</string>
+    <string name="distance_description">Straight-line distance between Start\nPoint and End Point.</string>
+
+    <string name="btn_reset_tracking">Reset Tracking</string>
+
+    <string name="nav_tracker">Tracker</string>
+    <string name="nav_history">History</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_reset_title">Reset Tracking?</string>
+    <string name="dialog_reset_message">This will clear the current Start Point, End Point, and calculated distance.</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_reset">Reset</string>
+
+    <string name="dialog_delete_title">Delete this record?</string>
+    <string name="dialog_delete_message">This distance record will be permanently removed. This action cannot be undone.</string>
+    <string name="btn_delete">Delete</string>
+
+    <!-- History -->
+    <string name="history_summary_title">HISTORY SUMMARY</string>
+    <string name="label_total_trips">Total Trips</string>
+    <string name="label_total_distance_history">Total Distance</string>
+    <string name="label_last_trip">Last Trip</string>
+
+    <string name="empty_history_title">No Distance History</string>
+    <string name="empty_history_message">Your completed distance trips will appear\nhere.</string>
+    <string name="btn_start_tracking">Start Tracking</string>
 </resources>
