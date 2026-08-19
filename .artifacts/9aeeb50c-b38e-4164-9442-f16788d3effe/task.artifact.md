@@ -1,0 +1,8 @@
+- [ ] Add `play-services-location` dependency
+    - [ ] Update `gradle/libs.versions.toml`
+    - [ ] Update `app/build.gradle.kts`
+- [ ] Implement `StartPointManager.kt`
+    - [ ] Add `startLocation` variable
+    - [ ] Implement `fetchStartPoint` function
+    - [ ] Implement `clearStartPoint` function
+- [ ] Verify build and sync
