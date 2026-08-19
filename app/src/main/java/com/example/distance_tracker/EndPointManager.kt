@@ -55,4 +55,11 @@ class EndPointManager(
                 Toast.makeText(context, "Location fetch failed", Toast.LENGTH_SHORT).show()
             }
     }
+
+    /**
+     * Clears the stored end location.
+     */
+    fun reset() {
+        endLocation = null
+    }
 }
