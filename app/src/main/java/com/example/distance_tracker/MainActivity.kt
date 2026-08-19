@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSetStart: Button
     private lateinit var btnSetEnd: Button
     private lateinit var btnReset: Button
+    private lateinit var btnStartTracking: Button
 
     // UI Elements - History
     private lateinit var layoutHistory: ConstraintLayout
@@ -80,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         btnSetStart = findViewById(R.id.btn_set_start)
         btnSetEnd = findViewById(R.id.btn_set_end)
         btnReset = findViewById(R.id.btn_reset)
+        btnStartTracking = findViewById(R.id.btn_start_tracking)
     }
 
     private fun setupBottomNavigation() {
@@ -136,6 +138,12 @@ class MainActivity : AppCompatActivity() {
 
         btnReset.setOnClickListener {
             resetTracking()
+        }
+
+        btnStartTracking.setOnClickListener {
+            layoutTracker.visibility = View.VISIBLE
+            layoutHistory.visibility = View.GONE
+            findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId = R.id.navigation_tracker
         }
     }
 
