@@ -1,5 +1,58 @@
 package com.example.distance_tracker
 
-class EndPointManager {
-    // Stub for end point management
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.Location
+import android.widget.Toast
+import com.google.android.gms.location.FusedLocationProviderClient
+
+/**
+ * Manages fetching the end location and calculating the distance from a start location.
+ */
+class EndPointManager(
+    private val context: Context,
+    private val fusedLocationClient: FusedLocationProviderClient
+) {
+
+    // Public read-only property with private set to store the end location
+    var endLocation: Location? = null
+        private set
+
+    /**
+     * Fetches current location, stores it as endLocation, and calculates distance from startLocation.
+     * Permission check is suppressed as it is handled by PermissionHelper.
+     */
+    @SuppressLint("MissingPermission")
+    fun setEndPoint(
+        startLocation: Location?,
+        onResult: (endLoc: Location, distanceMeters: Float) -> Unit
+    ) {
+        // 1. Validate that a start point exists before proceeding
+        if (startLocation == null) {
+            Toast.makeText(context, "Please set Start Point first", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 2. Fetch the last known location using FusedLocationProviderClient
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    // 3. Store the location in the property
+                    endLocation = location
+
+                    // 4. Calculate the distance between start and end points
+                    val distance = startLocation.distanceTo(location)
+
+                    // 5. Return the results via callback
+                    onResult(location, distance)
+                } else {
+                    // Handle case where location is enabled but could not be retrieved
+                    Toast.makeText(context, "Unable to get end location", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                // Handle API or internal fetch failures
+                Toast.makeText(context, "Location fetch failed", Toast.LENGTH_SHORT).show()
+            }
+    }
 }
