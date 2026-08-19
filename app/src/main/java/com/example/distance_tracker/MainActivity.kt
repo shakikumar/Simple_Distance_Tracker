@@ -106,14 +106,16 @@ class MainActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         btnSetStart.setOnClickListener {
             if (PermissionHelper.hasLocationPermission(this)) {
-                startPointManager.fetchStartPoint { location ->
-                    if (location != null) {
+                Toast.makeText(this, "Fetching start location...", Toast.LENGTH_SHORT).show()
+                startPointManager.fetchStartPoint(
+                    onSuccess = { location ->
                         updateStartUI(location)
-                        Toast.makeText(this, "Start point set!", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Failed to get location", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Start point captured!", Toast.LENGTH_SHORT).show()
+                    },
+                    onFailure = { error ->
+                        Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
                     }
-                }
+                )
             } else {
                 PermissionHelper.requestLocationPermission(this)
             }
@@ -121,13 +123,7 @@ class MainActivity : AppCompatActivity() {
 
         btnSetEnd.setOnClickListener {
             if (PermissionHelper.hasLocationPermission(this)) {
-                val startLocation = startPointManager.startLocation
-                if (startLocation == null) {
-                    Toast.makeText(this, "Please set Start Point first", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                endPointManager.setEndPoint(startLocation) { endLoc, distanceMeters ->
+                endPointManager.setEndPoint(startPointManager.startLocation) { endLoc, distanceMeters ->
                     updateEndUI(endLoc)
                     updateDistanceUI(distanceMeters)
                 }

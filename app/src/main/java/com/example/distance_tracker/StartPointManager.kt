@@ -16,15 +16,19 @@ class StartPointManager(private val fusedLocationClient: FusedLocationProviderCl
      * Uses getCurrentLocation to ensure a fresh result instead of a stale cached one.
      */
     @SuppressLint("MissingPermission")
-    fun fetchStartPoint(callback: (Location?) -> Unit) {
+    fun fetchStartPoint(onSuccess: (Location) -> Unit, onFailure: (String) -> Unit) {
         val cts = CancellationTokenSource()
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
             .addOnSuccessListener { location ->
-                startLocation = location
-                callback(location)
+                if (location != null) {
+                    startLocation = location
+                    onSuccess(location)
+                } else {
+                    onFailure("Unable to get fresh start location")
+                }
             }
-            .addOnFailureListener {
-                callback(null)
+            .addOnFailureListener { e ->
+                onFailure("Location fetch failed: ${e.message}")
             }
     }
 

@@ -35,6 +35,9 @@ class EndPointManager(
             return
         }
 
+        // Show feedback that fetching is in progress
+        Toast.makeText(context, "Fetching end location...", Toast.LENGTH_SHORT).show()
+
         // 2. Fetch fresh high-accuracy location
         val cts = CancellationTokenSource()
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
@@ -46,14 +49,17 @@ class EndPointManager(
                     // 4. Calculate the distance between start and end points
                     val distance = startLocation.distanceTo(location)
 
+                    // Provide feedback
+                    Toast.makeText(context, "End point captured!", Toast.LENGTH_SHORT).show()
+
                     // 5. Return the results via callback
                     onResult(location, distance)
                 } else {
-                    Toast.makeText(context, "Unable to get fresh end location", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Unable to get fresh end location. Try again.", Toast.LENGTH_SHORT).show()
                 }
             }
-            .addOnFailureListener {
-                Toast.makeText(context, "Location fetch failed", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Location fetch failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
